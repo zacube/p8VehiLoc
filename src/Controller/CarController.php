@@ -27,5 +27,18 @@ final class CarController extends AbstractController
         ]);
     }
 
+    #[Route('/car/{id}', name: 'app_car_detail', requirements: ['id' => '\d+'])]
+    public function detail(CarRepository $carRepository, int $id): Response
+    {
+        $car = $carRepository->find($id);
+        if (!$car) {
+            throw $this->createNotFoundException("La voiture $id n’existe pas.");
+        }
+
+        return $this->render('car/detail.html.twig', [
+            'car' => $car
+
+        ]);
+    }
 }
 
