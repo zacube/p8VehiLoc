@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Car;
 use App\Repository\CarRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,7 +23,6 @@ final class CarController extends AbstractController
         $output .= '</ul>';*/
 
         return $this->render('car/index.html.twig', [
-            'controller_name' => 'CarController',
             'cars' => $cars
 
         ]);
@@ -38,6 +39,26 @@ final class CarController extends AbstractController
         return $this->render('car/detail.html.twig', [
             'car' => $car
 
+        ]);
+    }
+
+    #[Route('/car/{id}/delete', name: 'app_car_delete', requirements: ['id' => '\d+'])]
+    public function delete(CarRepository $carRepository, int $id, EntityManagerInterface $em): Response
+    {
+        $car = $carRepository->find($id);
+        // Vérifier si l'entité existe
+        if (!$car) {
+            // Rediriger vers la liste des auteurs si l'ID est invalide
+            $this->addFlash('warning', 'Véhicule non trouvé.');
+            return $this->redirectToRoute('app_car');
+        }
+
+        $em->remove($car);
+        $em->flush();
+
+        $this->addFlash('success', 'Véhicule supprimé avec succès.');
+        return $this->redirectToRoute('app_car', [
+            'car' => $car
         ]);
     }
 }
