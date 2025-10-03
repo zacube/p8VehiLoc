@@ -6,6 +6,7 @@ use App\enum\CarStatus;
 use App\Repository\CarRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CarRepository::class)]
 class Car
@@ -16,18 +17,24 @@ class Car
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank]
     private ?float $monthlyPrice = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank]
     private ?float $dailyRate = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank]
+    #[Assert\Range(min: 1, max: 9)]
     private ?int $seats = null;
 
     #[ORM\Column(length: 255)]

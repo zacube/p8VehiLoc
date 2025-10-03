@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Car;
+use App\Form\CarType;
 use App\Repository\CarRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -58,7 +60,26 @@ final class CarController extends AbstractController
 
         $this->addFlash('success', 'Véhicule supprimé avec succès.');
         return $this->redirectToRoute('app_car', [
-            'car' => $car
+            'car' => $car]);
+    }
+
+    #[Route('/car/new', name: 'app_car_new')]
+    public function new(?Car $car, Request $request, EntityManagerInterface $em): Response
+    {
+        $car = new Car;
+        $form = $this->createForm(CarType::class, $car);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($car);
+            $em->flush();
+
+            $this->addFlash('success', 'Nouveau véhicule ajouté.');
+            return $this->redirectToRoute('app_car');
+        }
+
+        return $this->render('car/new.html.twig', [
+            'form' => $form,
         ]);
     }
 }
