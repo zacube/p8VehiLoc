@@ -11,18 +11,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/car', name: 'app_car_')]
 final class CarController extends AbstractController
 {
-    #[Route('/car', name: 'app_car')]
+
+    #[Route('', name: 'index', methods: ['GET'])]
+    #[Route('/', name: 'root', methods: ['GET'])]
     public function index(CarRepository $carRepository): Response
     {
         $cars = $carRepository->findAll();
 
-/*        $output = '<h1>Liste des voitures</h1><ul>';
-        foreach ($cars as $car) {
-            $output .= '<li>' . $car->getName() . ' ' . $car->getSeats() . '</li>';
-        }
-        $output .= '</ul>';*/
+
 
         return $this->render('car/index.html.twig', [
             'cars' => $cars
@@ -30,7 +29,7 @@ final class CarController extends AbstractController
         ]);
     }
 
-    #[Route('/car/{id}', name: 'app_car_detail', requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'detail', requirements: ['id' => '\d+'])]
     public function detail(CarRepository $carRepository, int $id): Response
     {
         $car = $carRepository->find($id);
@@ -44,7 +43,7 @@ final class CarController extends AbstractController
         ]);
     }
 
-    #[Route('/car/{id}/delete', name: 'app_car_delete', requirements: ['id' => '\d+'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'])]
     public function delete(CarRepository $carRepository, int $id, EntityManagerInterface $em): Response
     {
         $car = $carRepository->find($id);
@@ -52,19 +51,19 @@ final class CarController extends AbstractController
         if (!$car) {
             // Rediriger vers la liste des auteurs si l'ID est invalide
             $this->addFlash('warning', 'Véhicule non trouvé.');
-            return $this->redirectToRoute('app_car');
+            return $this->redirectToRoute('app_car_index');
         }
 
         $em->remove($car);
         $em->flush();
 
         $this->addFlash('success', 'Véhicule supprimé avec succès.');
-        return $this->redirectToRoute('app_car', [
+        return $this->redirectToRoute('app_car_index', [
             'car' => $car]);
     }
 
-    #[Route('/car/new', name: 'app_car_new')]
-    public function new(?Car $car, Request $request, EntityManagerInterface $em): Response
+    #[Route('/new', name: 'new')]
+    public function new(Request $request, EntityManagerInterface $em): Response
     {
         $car = new Car;
         $form = $this->createForm(CarType::class, $car);
@@ -75,7 +74,7 @@ final class CarController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Nouveau véhicule ajouté.');
-            return $this->redirectToRoute('app_car');
+            return $this->redirectToRoute('app_car_index');
         }
 
         return $this->render('car/new.html.twig', [
